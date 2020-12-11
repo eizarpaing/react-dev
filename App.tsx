@@ -19,9 +19,9 @@ export default function App() {
       body: JSON.stringify(request),
     })
       .then(response => {
-        alert(response.json());
+        alert(`success - ${response}`);
       }).catch(error => {
-        alert("last error" + error);
+        alert(`failed - ${error}`);
       });
   }
 
