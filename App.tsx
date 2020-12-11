@@ -12,10 +12,6 @@ export default function App() {
     let request = { title: 'testing movie 1' };
     await fetch('https://jsonplaceholder.typicode.com/posts', {
       method: 'POST',
-      headers: {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json'
-      },
       body: JSON.stringify(request),
     })
       .then(response => {
@@ -35,14 +31,18 @@ export default function App() {
         alert(error);
       });
   };
-
+  const handleSubmit=(v:any)=>{
+    v.preventDefault();
+    console.log(v);
+    postTestApi();
+  }
   return (
     <View style={styles.container}>
       <View style={{ flex: 1, flexDirection: "column", padding: "50px" }}>
         <img style={{ width: '138px', height: '46px', marginBottom: "20px" }} src={logo}></img>
         <ScrollView>
           <View style={{ paddingTop: '20px' }}>
-            <Form>
+            <Form onSubmit={handleSubmit}>
               <Form.Group>
                 <Form.Label style={{ fontSize: "14px" }}>name</Form.Label>
                 <View style={{ marginBottom: "20px" }}>
@@ -58,7 +58,7 @@ export default function App() {
                   </Form.Control>
                 </View>
               </Form.Group>
-              <Button onClick={postTestApi} variant="primary" style={{ height: "40px", width: "100%", borderRadius: "20px", backgroundColor: "#333333", color: "#FFFFFF", fontSize: "14px", marginTop: "10px" }}>
+              <Button type="submit" variant="primary" style={{ height: "40px", width: "100%", borderRadius: "20px", backgroundColor: "#333333", color: "#FFFFFF", fontSize: "14px", marginTop: "10px" }}>
                 Side Create
               </Button>
             </Form>
