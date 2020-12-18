@@ -126,7 +126,7 @@ export default function App() {
       body: JSON.stringify(requestData),
     }).then((response) => response.json())
       .then((responseJson) => {
-        setTimeout(() => setAllData(responseJson), 3000);
+       setAllData(responseJson);
       })
       .catch((error) => {
         console.error(error);
