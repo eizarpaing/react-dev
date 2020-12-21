@@ -1,14 +1,16 @@
 import React, { useState, useEffect } from 'react';
-import { StyleSheet, View, Text, TextInput, ScrollView } from 'react-native';
+import { ActivityIndicator, StyleSheet, View, Text, TextInput, ScrollView } from 'react-native';
 import Form from 'react-bootstrap/Form';
 import Button from 'react-bootstrap/Button';
-import { Video } from 'expo-av';
+import VideoPlayer from './VideoPlayer';
 import Log from './Log';
 
 export default function App() {
   const [isLoading, setLoading] = useState(true);
   const [videoUrl, setVideoUrl] = useState('');
   const [data, setData] = useState([]);
+  const [click, setClick] = useState(false);
+
   const [familyName, setFamilyName] = useState('');
   const [firstName, setFirstName] = useState('');
   const [kaisou, setKaisou] = useState('平家');
@@ -26,7 +28,7 @@ export default function App() {
   const [tochiPrice, setTochiPrice] = useState('');
   const [atamakin, setAtamakin] = useState('');
 
-  const logo = require("./assets/favicon.png");
+  const logo = require("./assets/logo.png");
   const screen = require("./assets/screen.png");
   const url = "https://usa-api.idomoo.com/api/v2/storyboards/generate";
 
@@ -36,7 +38,7 @@ export default function App() {
       "video": [
         {
           "height": 540,
-          "video_type": "mp4"
+          "video_type": "hls"
         }
       ]
     },
@@ -115,6 +117,7 @@ export default function App() {
     await setLoading(false);
     await setData(responseJson.output.video);
   }
+  
   const createVideo = async () => {
     await fetch(url, {
       method: 'POST',
@@ -125,12 +128,15 @@ export default function App() {
       },
       body: JSON.stringify(requestData),
     }).then((response) => response.json())
-      .then((responseJson) => {
-       setAllData(responseJson);
-      })
-      .catch((error) => {
-        console.error(error);
-      });
+    .then((responseJson) => {
+      let videoURL = responseJson.output.video[0].links.url;
+      setVideoUrl(videoURL);
+      setLoading(false);
+      setData(responseJson.output.video);
+    })
+    .catch((error) =>{
+      console.error(error);
+    });
   };
 
   const postTestApi = async () => {
@@ -160,6 +166,8 @@ export default function App() {
 
   const handleSubmit = async (v: any) => {
     v.preventDefault();
+    setClick(true);
+    setLoading(true);
     await createVideo();
   }
 
@@ -280,7 +288,7 @@ export default function App() {
         </ScrollView>
       </View>
       <View style={styles.secondContainer}>
-        <View style={{ padding: "50px", position: "fixed", width: "70%" }}>
+        <View style={styles.fixedContainer}>
           <View>
             <Text style={{ fontSize: "25px", fontWeight: "bold", color: "#fff", alignSelf: "center" }}>
               家づくりは「住んでからかかる費⽤」も重要！{"\n"}
@@ -288,19 +296,10 @@ export default function App() {
             </Text>
           </View>
           <View>
-            {isLoading ? <img style={{ paddingTop: "20px", alignSelf: "center", width: "70%", height: "70%" }} src={screen}></img> :
-              <Video
-                source={{ uri: videoUrl }}
-                rate={1.0}
-                volume={1.0}
-                resizeMode="cover"
-                shouldPlay
-                progressUpdateIntervalMillis={5000}
-                useNativeControls
-                style={{ paddingTop: "20px", alignSelf: "center", width: "100%", height: "70%" }}
-                posterStyle={{ paddingTop: "20px", alignSelf: "center", width: "100%", height: "70%" }}>
-              </Video>
-            }
+            {!click ? <img style={{ paddingTop: "20px", alignSelf: "center", width: "70%", height: "70%"}} src={screen}></img> : 
+              [isLoading ? <View style={{ padding: "20%", flex: 1, alignItems: "center", justifyContent: "center", zIndex: 20 }}><ActivityIndicator size="large" color="white" /></View> : 
+              <VideoPlayer videoSrc={videoUrl} />
+            ]}
           </View>
         </View>
       </View>
@@ -309,6 +308,11 @@ export default function App() {
 }
 
 const styles = StyleSheet.create({
+  fixedContainer: {
+    padding: "50px",
+    position: "fixed",
+    width: "70%"
+  },
   container: {
     flex: 1,
     flexDirection: "row",
@@ -321,11 +325,15 @@ const styles = StyleSheet.create({
     padding: "40px",
     textAlign: "center",
   },
+  formDiv: { 
+    marginBottom: "20px", 
+    marginTop: "2px" 
+  },
   buttonStyle: {
     height: "40px",
     width: "100%",
     backgroundColor: "#333333",
     color: "#FFFFFF",
     fontSize: "14px"
-  }
+  },
 });
